@@ -60,28 +60,65 @@ func volumeCreditsFor(perf Performance, plays Plays) float64 {
 
 	return result
 }
-
-func statement(invoice Invoice, plays Plays) string {
-	totalAmount := 0.0
-	volumeCredits := 0.0
-	result := fmt.Sprintf("Statement for %s\n", invoice.Customer)
-
+func totalAmountFor(invoice Invoice, plays Plays) float64 {
+	result := 0.0
 	for _, perf := range invoice.Performances {
 
-		volumeCredits += volumeCreditsFor(perf, plays)
-		// // add volume credits
-		// volumeCredits += math.Max(float64(perf.Audience-30), 0)
-		// // add extra credit for every ten comedy attendees
-		// if "comedy" == playType(playFor(plays, perf)) {
-		// 	volumeCredits += math.Floor(float64(perf.Audience / 5))
-		// }
+		result += amountFor(perf, playFor(plays, perf))
+
+	}
+	return result
+}
+
+func totalvolumeCreditsFor(invoice Invoice, plays Plays) float64 {
+	result := 0.0
+
+	for _, perf := range invoice.Performances {
+		result += volumeCreditsFor(perf, plays)
+	}
+	return result
+}
+
+func statement(invoice Invoice, plays Plays) string {
+	return renderPlenText(invoice, plays)
+
+}
+
+type Bill struct {
+	Customer           string
+	TotalAmount        float64
+	TotalvolumeCredits float64
+}
+type Rete struct {
+	Play          Play
+	Amount        float64
+	volumeCredits float64
+	Audience      int
+}
+
+func renderPlenText(invoice Invoice, plays Plays) string {
+	bill := Bill{
+		Customer:           invoice.Customer,
+		TotalAmount:        totalAmountFor(invoice, plays),
+		TotalvolumeCredits: totalvolumeCreditsFor(invoice, plays),
+	}
+
+	result := fmt.Sprintf("Statement for %s\n", bill.Customer)
+
+	for _, perf := range invoice.Performances {
+		r := Rete{
+			Play:          playFor(plays, perf),
+			volumeCredits: volumeCreditsFor(perf, plays),
+			Amount:        amountFor(perf, playFor(plays, perf)),
+			Audience:      perf.Audience,
+		}
 
 		// print line for this order
-		result += fmt.Sprintf("  %s: $%.2f (%d seats)\n", playName(playFor(plays, perf)), amountFor(perf, playFor(plays, perf))/100, perf.Audience)
-		totalAmount += amountFor(perf, playFor(plays, perf))
+		result += fmt.Sprintf("  %s: $%.2f (%d seats)\n", r.Play.Name, r.Amount/100, r.Audience)
+
 	}
-	result += fmt.Sprintf("Amount owed is $%.2f\n", totalAmount/100)
-	result += fmt.Sprintf("you earned %.0f credits\n", volumeCredits)
+	result += fmt.Sprintf("Amount owed is $%.2f\n", bill.TotalAmount/100)
+	result += fmt.Sprintf("you earned %.0f credits\n", bill.TotalvolumeCredits)
 	return result
 }
 
