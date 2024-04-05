@@ -5,8 +5,8 @@ import (
 	"math"
 )
 
-type Plays map[string]_Play
-type _Play struct {
+type Plays map[string]Play
+type Play struct {
 	Name string
 	Type string
 }
@@ -20,15 +20,18 @@ type Invoice struct {
 	Performances []Performance `json:"performances"`
 }
 
-func playFor(play _Play) string {
+func playType(play Play) string {
 	return play.Type
 }
-func playName(play _Play) string {
+func playName(play Play) string {
 	return play.Name
 }
-func amountFor(perf Performance, play _Play) float64 {
+func playFor(play Plays, perf Performance) Play {
+	return play[perf.PlayID]
+}
+func amountFor(perf Performance, play Play) float64 {
 	result := 0.0
-	switch playFor(play) {
+	switch playType(play) {
 	case "tragedy":
 		result = 40000
 		if perf.Audience > 30 {
@@ -41,10 +44,21 @@ func amountFor(perf Performance, play _Play) float64 {
 		}
 		result += 300 * float64(perf.Audience)
 	default:
-		panic(fmt.Sprintf("unknow type: %s", playFor(play)))
+		panic(fmt.Sprintf("unknow type: %s", playType(play)))
 	}
 	return result
 
+}
+func volumeCreditsFor(perf Performance, plays Plays) float64 {
+	result := 0.0
+	// add volume credits
+	result += math.Max(float64(perf.Audience-30), 0)
+	// add extra credit for every ten comedy attendees
+	if "comedy" == playType(playFor(plays, perf)) {
+		result += math.Floor(float64(perf.Audience / 5))
+	}
+
+	return result
 }
 
 func statement(invoice Invoice, plays Plays) string {
@@ -53,19 +67,18 @@ func statement(invoice Invoice, plays Plays) string {
 	result := fmt.Sprintf("Statement for %s\n", invoice.Customer)
 
 	for _, perf := range invoice.Performances {
-		play := plays[perf.PlayID]
-		thisAmount := amountFor(perf, play)
 
-		// add volume credits
-		volumeCredits += math.Max(float64(perf.Audience-30), 0)
-		// add extra credit for every ten comedy attendees
-		if "comedy" == playFor(play) {
-			volumeCredits += math.Floor(float64(perf.Audience / 5))
-		}
+		volumeCredits += volumeCreditsFor(perf, plays)
+		// // add volume credits
+		// volumeCredits += math.Max(float64(perf.Audience-30), 0)
+		// // add extra credit for every ten comedy attendees
+		// if "comedy" == playType(playFor(plays, perf)) {
+		// 	volumeCredits += math.Floor(float64(perf.Audience / 5))
+		// }
 
 		// print line for this order
-		result += fmt.Sprintf("  %s: $%.2f (%d seats)\n", playName(play), thisAmount/100, perf.Audience)
-		totalAmount += thisAmount
+		result += fmt.Sprintf("  %s: $%.2f (%d seats)\n", playName(playFor(plays, perf)), amountFor(perf, playFor(plays, perf))/100, perf.Audience)
+		totalAmount += amountFor(perf, playFor(plays, perf))
 	}
 	result += fmt.Sprintf("Amount owed is $%.2f\n", totalAmount/100)
 	result += fmt.Sprintf("you earned %.0f credits\n", volumeCredits)
@@ -80,7 +93,7 @@ func main() {
 			{PlayID: "as-like", Audience: 35},
 			{PlayID: "othello", Audience: 40},
 		}}
-	plays := map[string]_Play{
+	plays := map[string]Play{
 		"hamlet":  {Name: "Hamlet", Type: "tragedy"},
 		"as-like": {Name: "As You Like It", Type: "comedy"},
 		"othello": {Name: "Othello", Type: "tragedy"},
