@@ -1,0 +1,11 @@
+mode: set
+github.com/anuchito/fizzbuzz/fizzbuzz.go:5.29,6.19 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:6.19,8.3 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:9.2,9.15 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:9.15,11.3 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:12.2,12.15 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:12.15,14.3 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:16.2,16.24 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:19.27,21.2 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:22.27,24.2 1 1
+github.com/anuchito/fizzbuzz/fizzbuzz.go:25.31,27.2 1 1
