@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-type Play map[string]_Play
+type Plays map[string]_Play
 type _Play struct {
 	Name string
 	Type string
@@ -47,7 +47,7 @@ func amountFor(perf Performance, play _Play) float64 {
 
 }
 
-func statement(invoice Invoice, plays Play) string {
+func statement(invoice Invoice, plays Plays) string {
 	totalAmount := 0.0
 	volumeCredits := 0.0
 	result := fmt.Sprintf("Statement for %s\n", invoice.Customer)
