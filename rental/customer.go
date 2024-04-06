@@ -21,12 +21,6 @@ func (rcvr Customer) Name() string {
 	return rcvr.name
 }
 
-func (r Rental) Charge() float64 {
-
-	return r.Movie().Price.Charge(r.DaysRented())
-
-}
-
 func (r Rental) GetPoints() int {
 
 	if r.Movie().PriceCode() == NEW_RELEASE && r.DaysRented() > 1 {
