@@ -7,21 +7,97 @@ const (
 	REGULAR
 )
 
-type Movie struct {
-	title     string
+type Charger interface {
+	Charge(daysRented int) float64
+	PriceCode() int
+}
+
+type Childrens struct {
+	priceCode int
+}
+type NewRelease struct {
+	priceCode int
+}
+type Regular struct {
 	priceCode int
 }
 
-func NewMovie(title string, priceCode int) (rcvr Movie) {
+func CreateChildrens() Childrens {
+	return Childrens{
+		priceCode: CHILDRENS,
+	}
+}
+
+func CreateNewRelease() NewRelease {
+	return NewRelease{
+		priceCode: NEW_RELEASE,
+	}
+}
+
+func CreateRegular() Regular {
+	return Regular{
+		priceCode: REGULAR,
+	}
+}
+
+func (c Regular) PriceCode() int {
+	return c.priceCode
+}
+
+func (c Childrens) PriceCode() int {
+	return c.priceCode
+}
+
+func (c NewRelease) PriceCode() int {
+	return c.priceCode
+}
+
+func (c Childrens) Charge(daysRented int) float64 {
+	result := 1.5
+	if daysRented > 3 {
+		result += float64(daysRented-3) * 1.5
+	}
+	return result
+}
+
+func (c Regular) Charge(daysRented int) float64 {
+	result := 2.0
+	if daysRented > 2 {
+		result += float64(daysRented-2) * 1.5
+	}
+	return result
+}
+
+func (c NewRelease) Charge(daysRented int) float64 {
+	return float64(daysRented) * 3.0
+
+}
+
+type Movie struct {
+	title     string
+	priceCode int
+	Charger   Charger
+}
+
+func NewM(title string, charger Charger) (m Movie) {
+	return Movie{
+		title:     title,
+		priceCode: charger.PriceCode(),
+		Charger:   charger,
+	}
+
+}
+
+func NewMovie(title string, priceCode int) (m Movie) {
 	return Movie{
 		title:     title,
 		priceCode: priceCode,
 	}
 
 }
-func (rcvr Movie) PriceCode() int {
-	return rcvr.priceCode
+func (m Movie) PriceCode() int {
+	return m.priceCode
 }
-func (rcvr Movie) Title() string {
-	return rcvr.title
+func (m Movie) Title() string {
+	return m.title
 }

@@ -31,10 +31,10 @@ func RegularCharge(r Rental) float64 {
 func NewReleaseCharge(r Rental) float64 {
 	return float64(r.DaysRented()) * 3.0
 }
-func ChildrensCharge(r Rental) float64 {
+func ChildrensCharge(daysRented int) float64 {
 	result := 1.5
-	if r.DaysRented() > 3 {
-		result += float64(r.DaysRented()-3) * 1.5
+	if daysRented > 3 {
+		result += float64(daysRented-3) * 1.5
 	}
 	return result
 }
@@ -42,13 +42,16 @@ func ChildrensCharge(r Rental) float64 {
 func (r Rental) Charge() float64 {
 	switch r.Movie().PriceCode() {
 	case REGULAR:
-		return RegularCharge(r)
+		return r.Movie().Charger.Charge(r.DaysRented())
 	case NEW_RELEASE:
-		return NewReleaseCharge(r)
+		return r.Movie().Charger.Charge(r.DaysRented())
 	case CHILDRENS:
-		return ChildrensCharge(r)
+		return r.Movie().Charger.Charge(r.DaysRented())
+	case 0:
+		return r.Movie().Charger.Charge(r.DaysRented())
 	}
 	return 0
+
 }
 
 func (r Rental) GetPoints() int {
