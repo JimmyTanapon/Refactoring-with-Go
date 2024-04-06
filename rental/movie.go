@@ -7,7 +7,7 @@ const (
 	REGULAR
 )
 
-type Charger interface {
+type Pricer interface {
 	Charge(daysRented int) float64
 	PriceCode() int
 }
@@ -76,14 +76,14 @@ func (c NewRelease) Charge(daysRented int) float64 {
 type Movie struct {
 	title     string
 	priceCode int
-	Charger   Charger
+	Price     Pricer
 }
 
-func NewM(title string, charger Charger) (m Movie) {
+func NewM(title string, charger Pricer) (m Movie) {
 	return Movie{
 		title:     title,
 		priceCode: charger.PriceCode(),
-		Charger:   charger,
+		Price:     charger,
 	}
 
 }
