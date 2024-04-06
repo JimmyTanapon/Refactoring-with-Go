@@ -47,22 +47,74 @@ func (r Rental) GetPoints() int {
 	}
 	return 1
 }
-func (rcvr Customer) Statement() string {
 
-	totalAmount := 0.0
-	frequentRenterPoints := 0
-	result := fmt.Sprintf("Rental Record for %v\n", rcvr.Name())
-	for _, r := range rcvr.rentals {
+func getTotalAmount(rentals []Rental) float64 {
+	result := 0.0
+	for _, r := range rentals {
 
-		frequentRenterPoints += r.GetPoints()
-
-		result += fmt.Sprintf("\t%v\t%.1f\n", r.Movie().Title(), r.Charge())
-
-		totalAmount += r.Charge()
+		result += r.Charge()
 
 	}
-	result += fmt.Sprintf("Amount owed is %.1f\n", totalAmount)
-	result += fmt.Sprintf("You earned %v frequent renter points", frequentRenterPoints)
-
 	return result
+}
+func getTotalPoints(rentals []Rental) int {
+	result := 0
+	for _, r := range rentals {
+
+		result += r.GetPoints()
+
+	}
+	return result
+}
+
+type Bill struct {
+	Customer    Customer
+	TotalAmount float64
+	MovieRates  []MovieRate
+	Points      int
+}
+type MovieRate struct {
+	Title  string
+	Amount float64
+}
+
+func renderPlenText(b Bill) string {
+	result := fmt.Sprintf("Rental Record for %v\n", b.Customer.Name())
+	for _, r := range b.MovieRates {
+
+		result += fmt.Sprintf("\t%v\t%.1f\n", r.Title, r.Amount)
+
+	}
+
+	result += fmt.Sprintf("Amount owed is %.1f\n", b.TotalAmount)
+	result += fmt.Sprintf("You earned %v frequent renter points", b.Points)
+	return result
+}
+
+func (c Customer) Statement() string {
+	movieRates := []MovieRate{}
+
+	// result := fmt.Sprintf("Rental Record for %v\n", c.Name())
+
+	for _, r := range c.rentals {
+		mr := MovieRate{
+			Title:  r.Movie().Title(),
+			Amount: r.Charge(),
+		}
+
+		movieRates = append(movieRates, mr)
+		// result += fmt.Sprintf("\t%v\t%.1f\n", mr.Title, mr.Amount)
+
+	}
+	bill := Bill{
+		Customer:    c,
+		TotalAmount: getTotalAmount(c.rentals),
+		MovieRates:  movieRates,
+		Points:      getTotalPoints(c.rentals),
+	}
+
+	// result += fmt.Sprintf("Amount owed is %.1f\n", bill.TotalAmount)
+	// result += fmt.Sprintf("You earned %v frequent renter points", bill.Points)
+
+	return renderPlenText(bill)
 }
