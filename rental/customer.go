@@ -21,23 +21,34 @@ func (rcvr Customer) Name() string {
 	return rcvr.name
 }
 
-func (r Rental) Charge() float64 {
-	result := 0.0
-	switch r.Movie().PriceCode() {
-	case REGULAR:
-		result += 2
-		if r.DaysRented() > 2 {
-			result += float64(r.DaysRented()-2) * 1.5
-		}
-	case NEW_RELEASE:
-		result += float64(r.DaysRented()) * 3.0
-	case CHILDRENS:
-		result += 1.5
-		if r.DaysRented() > 3 {
-			result += float64(r.DaysRented()-3) * 1.5
-		}
+func RegularCharge(r Rental) float64 {
+	result := 2.0
+	if r.DaysRented() > 2 {
+		result += float64(r.DaysRented()-2) * 1.5
 	}
 	return result
+}
+func NewReleaseCharge(r Rental) float64 {
+	return float64(r.DaysRented()) * 3.0
+}
+func ChildrensCharge(r Rental) float64 {
+	result := 1.5
+	if r.DaysRented() > 3 {
+		result += float64(r.DaysRented()-3) * 1.5
+	}
+	return result
+}
+
+func (r Rental) Charge() float64 {
+	switch r.Movie().PriceCode() {
+	case REGULAR:
+		return RegularCharge(r)
+	case NEW_RELEASE:
+		return NewReleaseCharge(r)
+	case CHILDRENS:
+		return ChildrensCharge(r)
+	}
+	return 0
 }
 
 func (r Rental) GetPoints() int {
@@ -94,8 +105,6 @@ func renderPlenText(b Bill) string {
 func (c Customer) Statement() string {
 	movieRates := []MovieRate{}
 
-	// result := fmt.Sprintf("Rental Record for %v\n", c.Name())
-
 	for _, r := range c.rentals {
 		mr := MovieRate{
 			Title:  r.Movie().Title(),
@@ -103,7 +112,6 @@ func (c Customer) Statement() string {
 		}
 
 		movieRates = append(movieRates, mr)
-		// result += fmt.Sprintf("\t%v\t%.1f\n", mr.Title, mr.Amount)
 
 	}
 	bill := Bill{
@@ -112,9 +120,6 @@ func (c Customer) Statement() string {
 		MovieRates:  movieRates,
 		Points:      getTotalPoints(c.rentals),
 	}
-
-	// result += fmt.Sprintf("Amount owed is %.1f\n", bill.TotalAmount)
-	// result += fmt.Sprintf("You earned %v frequent renter points", bill.Points)
 
 	return renderPlenText(bill)
 }
